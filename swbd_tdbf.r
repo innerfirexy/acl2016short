@@ -32,6 +32,9 @@ summary(lmer(td ~ inTileID + (1|convID) + (1|tileID), subset(dt, role == 'respon
 summary(lmer(bf ~ inTileID + (1|convID) + (1|tileID), subset(dt, role == 'initiator')))
 summary(lmer(bf ~ inTileID + (1|convID) + (1|tileID), subset(dt, role == 'responder')))
 
-# wordNum vs. globalID
+# wordNum vs. inTileID
 summary(lmer(wordNum ~ inTileID + (1|convID) + (1|tileID), subset(dt, role == 'initiator'))) # t = -9.63
 summary(lmer(wordNum ~ inTileID + (1|convID) + (1|tileID), subset(dt, role == 'responder'))) # t = -16.54
+
+# ent vs. inTileID
+summary(lmer(ent ~ inTileID + (1|convID) + (1|tileID), subset(dt, role == 'initiator')))
