@@ -71,8 +71,36 @@ def compute_tdbf_worker(args):
     queue.put(1)
     return (xml_id, div_idx, g_id, str(sub_tree), td, bf)
 
+# update_parsedC5
+def update_parsedC5_tdbf():
+    """
+    update the parsedC5 column in entropy_DEM100 table from the same column in DEM_2spkr table
+    """
+    conn = db_conn('bnc')
+    cur = conn.cursor()
+    # update parsedC5 from inner join
+    sql = '''UPDATE entropy_DEM100 AS e INNER JOIN DEM_2spkr AS d ON
+        e.xmlID = d.xmlID AND e.divIndex = d.divIndex AND e.globalID = d.globalID
+        SET e.parsedC5 = d.parsedC5'''
+    cur.execute(sql)
+    # update td bf using parsedC5
+    sql = 'SELECT xmlID, divIndex, globalID, parsedC5 FROM entropy_DEM100'
+    cur.execute(sql)
+    data = cur.fetchall()
+    for i, datum in enumerate(data):
+        xml_id, div_idx, g_id, parsed_str = datum
+        tree = Tree.fromstring(parsed_str)
+        td = tree.height()
+        bf = numpy.mean([len(t) for t in tree.subtrees()])
+        sql = 'UPDATE entropy_DEM100 SET td = %s, bf = %s WHERE xmlID = %s AND divIndex = %s AND globalID = %s'
+        cur.execute(sql, (td, bf, xml_id, div_idx, g_id))
+        if i % 999 == 0 and i > 0:
+            sys.stdout.write('\r{}/{} updated'.format(i+1, len(data)))
+            sys.stdout.flush()
+    conn.commit()
+
 
 
 # main
 if __name__ == '__main__':
-    compute_tdbf()
+    update_parsedC5_tdbf()
