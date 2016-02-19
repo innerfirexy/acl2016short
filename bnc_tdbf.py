@@ -74,4 +74,4 @@ def compute_tdbf_worker(args):
 
 # main
 if __name__ == '__main__':
-    pass
+    compute_tdbf()
