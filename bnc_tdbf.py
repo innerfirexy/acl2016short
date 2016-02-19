@@ -44,7 +44,7 @@ def compute_tdbf():
             print('\n all rows processed')
             break
         else:
-            sys.stdout.write('\r{}/{} processed'.format(queue.size(), len(args)))
+            sys.stdout.write('\r{}/{} processed'.format(queue.qsize(), len(args)))
             sys.stdout.flush()
             time.sleep(1)
     # update
