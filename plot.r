@@ -122,7 +122,9 @@ p.bnc4 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = td)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .1)) +
     xlab('within-topic position of sentence') + ylab('tree depth')
+pdf('bnc-td_vs_inTopicID_roles.pdf')
 plot(p.bnc4)
+dev.off()
 
 # bf vs inTopicID
 p.bnc5 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = bf)) +
@@ -131,7 +133,9 @@ p.bnc5 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = bf)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .1)) +
     xlab('within-topic position of sentence') + ylab('branching factor')
+pdf('bnc-bf_vs_inTopicID_roles.pdf')
 plot(p.bnc5)
+dev.off()
 
 # tdAdj vs inTopicID
 p.bnc6 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)) +
@@ -140,7 +144,9 @@ p.bnc6 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)) 
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .1)) +
     xlab('within-topic position of sentence') + ylab('adjusted tree depth')
+pdf('bnc-tdAdj_vs_inTopicID_roles.pdf')
 plot(p.bnc6)
+dev.off()
 
 # bfAdj vs inTopicID
 p.bnc7 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)) +
@@ -149,7 +155,9 @@ p.bnc7 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)) 
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .1)) +
     xlab('within-topic position of sentence') + ylab('adjusted branching factor')
+pdf('bnc-bfAdj_vs_inTopicID_roles.pdf')
 plot(p.bnc7)
+dev.off()
 
 
 
