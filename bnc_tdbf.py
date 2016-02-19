@@ -2,12 +2,14 @@
 # Yang Xu
 # 2/18/2016
 
-import nltk
 import MySQLdb
 import time
+import numpy
 
 import multiprocessing
 from multiprocessing import Pool, Manager
+
+from nltk.tree import *
 
 
 # get db connection
@@ -25,7 +27,7 @@ def compute_tdbf():
     conn = db_conn('bnc')
     cur = conn.cursor()
     # select keys and parsed from table
-    sql = 'SELECT xmlID, divIndex, globalID, tagged FROM entropy_DEM100'
+    sql = 'SELECT xmlID, divIndex, globalID, parsed FROM entropy_DEM100'
     cur.execute(sql)
     data = cur.fetchall()
     # initialize
@@ -47,18 +49,27 @@ def compute_tdbf():
     # update
     processed_results = result.get()
     for i, res in enumerate(processed_results):
-        xml_id, div_idx, g_id, simple_tree, td, bf = res
+        xml_id, div_idx, g_id, sub_tree, td, bf = res
         sql = 'UPDATE entropy_DEM100 SET parsedSimple = %s, td = %s, bf = %s WHERE xmlID = %s AND divIndex = %s AND globalID = %s'
-        cur.execute(sql)
+        cur.execute(sql, (sub_tree, td, bf, xml_id, div_idx, g_id))
         if i % 999 == 0 and i > 0:
             sys.stdout.write('\r{}/{} updated'.format(i+1, len(processed_results)))
             sys.stdout.flush()
     conn.commit()
-    pass
 
 # worker func for compute_tdbf
-def compute_tdbf_worker():
-    pass
+def compute_tdbf_worker(args):
+    (xml_id, div_idx, g_id, parsed_str), queue = args
+    # construct the full tree, and get sub_tree
+    full_tree = Tree.fromstring(parsed_str)
+    sub_tree = full_tree[0] if full_tree.label() == 'ROOT' else full_tree
+    # compute td and bf
+    td = sub_tree.height()
+    bf = numpy.mean([len(t) for t in sub_tree.subtrees()])
+    # capsulate and return
+    queue.put(1)
+    return (xml_id, div_idx, g_id, str(sub_tree), td, bf)
+
 
 
 # main
