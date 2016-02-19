@@ -5,6 +5,7 @@
 import MySQLdb
 import time
 import numpy
+import sys
 
 import multiprocessing
 from multiprocessing import Pool, Manager
