@@ -5,6 +5,7 @@
 # 2/23/2016
 
 from nltk.tree import *
+import numpy as np
 
 # main
 if __name__ == '__main__':
@@ -19,3 +20,11 @@ if __name__ == '__main__':
     # print latex qtree format
     print(t1.pformat_latex_qtree())
     print(t2.pformat_latex_qtree())
+
+    # tree depth
+    print(t1.height())
+    print(t2.height())
+
+    # branching factor
+    print(np.mean([len(t) for t in t1.subtrees()]))
+    print(np.mean([len(t) for t in t2.subtrees()]))
