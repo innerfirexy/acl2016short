@@ -8,6 +8,11 @@ from nltk.tree import *
 import MySQLdb
 import sys
 import numpy
+import time
+
+import multiprocessing
+from multiprocessing import Pool, Manager
+
 
 # get db connection
 def db_conn(db_name):
