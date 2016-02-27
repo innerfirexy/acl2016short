@@ -90,9 +90,9 @@ p.swbd6 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)
     theme(legend.position = c(.8, .15)) +
     xlab('within-topic position of sentence') + ylab('normalized tree depth') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-# pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 5, 5)
-# plot(p.swbd6)
-# dev.off()
+pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 5, 5)
+plot(p.swbd6)
+dev.off()
 
 # bfAdj vs inTopicID
 p.swbd7 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)) +
@@ -103,9 +103,9 @@ p.swbd7 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)
     theme(legend.position = c(.8, .8)) +
     xlab('within-topic position of sentence') + ylab('normalized branching factor') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-# pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 5, 5)
-# plot(p.swbd7)
-# dev.off()
+pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 5, 5)
+plot(p.swbd7)
+dev.off()
 
 ## plot tdAdj and bfAdj together in one graph
 library(gridExtra)
@@ -113,6 +113,52 @@ library(gridExtra)
 pdf('swbd_tdAdj_bfAdj.pdf', 4.5, 9)
 grid.arrange(p.swbd6, p.swbd7, nrow = 2, heights = c(1, 1))
 dev.off()
+
+## plot tdAdj and bfAdj in one axis
+df.swbd.part = df.swbd[, .(inTopicID, role, tdAdj, bfAdj)]
+df.swbd.melt = melt(df.swbd.part, id.vars = c('inTopicID', 'role'), measure.vars = c('tdAdj', 'bfAdj'))
+
+setkey(df.swbd.melt, role, variable)
+df.swbd.melt$group = 'NTD: follower'
+df.swbd.melt[role == 'leader' & variable == 'tdAdj', group := 'NTD: leader']
+df.swbd.melt[role == 'follower' & variable == 'bfAdj', group := 'NBF: follower']
+df.swbd.melt[role == 'leader' & variable == 'bfAdj', group := 'NBF: leader']
+
+p.swbd.adj = ggplot(subset(df.swbd.melt, inTopicID <= 10), aes(x = inTopicID, y = value)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .3, aes(fill = group)) +
+    stat_summary(fun.y = mean, geom = 'line', aes(lty = group)) +
+    stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
+    scale_x_continuous(breaks = 1:10) +
+    theme(legend.position = c(.8, .15)) +
+    xlab('within-topic position of sentence') + ylab('metric') +
+    guides(fill = guide_legend(title = 'group'),
+        lty = guide_legend(title = 'group'),
+        shape = guide_legend(title = 'group')) +
+    scale_fill_manual(values = c('NTD: leader' = "#E69F00", 'NTD: follower' = "#E69F00",
+        'NBF: leader' = "#56B4E9", 'NBF: follower' = "#56B4E9")) +
+    scale_linetype_manual(values = c('NTD: leader' = 1, 'NTD: follower' = 3, 'NBF: leader' = 1, 'NBF: follower' = 3)) +
+    scale_shape_manual(values = c('NTD: leader' = 1, 'NTD: follower' = 1, 'NBF: leader' = 4, 'NBF: follower' = 4))
+
+pdf('swbd_tdAdj_bfAdj_one.pdf', 5, 5)
+plot(p.swbd.adj)
+dev.off()
+
+p.swbd.adj1 = ggplot(subset(df.swbd.melt, inTopicID <= 10), aes(x = inTopicID, y = value)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'errorbar', width = .2, aes(lty = group)) +
+    stat_summary(fun.y = mean, geom = 'line', aes(lty = group)) +
+    stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
+    scale_x_continuous(breaks = 1:10) +
+    theme(legend.position = c(.8, .15)) +
+    xlab('within-topic position of sentence') + ylab('metric') +
+    guides(lty = guide_legend(title = 'group'),
+        shape = guide_legend(title = 'group')) +
+    scale_linetype_manual(values = c('NTD: leader' = 1, 'NTD: follower' = 3, 'NBF: leader' = 1, 'NBF: follower' = 3)) +
+    scale_shape_manual(values = c('NTD: leader' = 1, 'NTD: follower' = 1, 'NBF: leader' = 4, 'NBF: follower' = 4))
+
+pdf('swbd_tdAdj_bfAdj_two.pdf', 5, 5)
+plot(p.swbd.adj1)
+dev.off()
+
 
 
 
