@@ -3,22 +3,21 @@
 # 2/15/2016
 
 library(ggplot2)
-library(dplyr)
+library(data.table)
 
-df.swbd = readRDS('swbd.leader.ent.merged.rds')
+df.swbd = readRDS('swbd.leader.new.rds')
 df.bnc = readRDS('bnc.leader.tdbf.rds')
 
 # change byLeader column to character
 df.swbd$byLeader = as.character(df.swbd$byLeader)
-df.swbd[df.swbd$byLeader == 'TRUE',]$byLeader = 'initiator'
-df.swbd[df.swbd$byLeader == 'FALSE',]$byLeader = 'responder'
-df.swbd = rename(df.swbd, role = byLeader)
+df.swbd[df.swbd$byLeader == 'TRUE',]$byLeader = 'leader'
+df.swbd[df.swbd$byLeader == 'FALSE',]$byLeader = 'follower'
+setnames(df.swbd, 'byLeader', 'role')
 
 df.bnc$byLeader = as.character(df.bnc$byLeader)
-df.bnc[df.bnc$byLeader == 'TRUE',]$byLeader = 'initiator'
-df.bnc[df.bnc$byLeader == 'FALSE',]$byLeader = 'responder'
-df.bnc = rename(df.bnc, role = byLeader)
-
+df.bnc[df.bnc$byLeader == 'TRUE',]$byLeader = 'leader'
+df.bnc[df.bnc$byLeader == 'FALSE',]$byLeader = 'follower'
+setnames(df.bnc, 'byLeader', 'role')
 
 
 # plot swbd
@@ -58,29 +57,65 @@ pdf('swbd-wordNum_vs_inTopicID_roles.pdf', 5, 5)
 plot(p.swbd3)
 dev.off()
 
-# treeDepth vs inTopicID
-p.swbd4 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = treeDepth)) +
+# td vs inTopicID
+p.swbd4 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = td)) +
     stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
     stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .1)) +
-    xlab('within-topic position of sentence') + ylab('adjusted tree depth') +
+    xlab('within-topic position of sentence') + ylab('tree depth') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-pdf('swbd-treeDepth_vs_inTopicID_roles.pdf')
+pdf('swbd-td_vs_inTopicID_roles.pdf')
 plot(p.swbd4)
 dev.off()
 
-# branchingFactor vs inTopicID
-p.swbd5 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = branchingFactor)) +
+# bf vs inTopicID
+p.swbd5 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bf)) +
     stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
     stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .1)) +
-    xlab('within-topic position of sentence') + ylab('adjusted tree depth') +
+    xlab('within-topic position of sentence') + ylab('branching factor') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-pdf('swbd-branchingFactor_vs_inTopicID_roles.pdf')
+pdf('swbd-bf_vs_inTopicID_roles.pdf')
 plot(p.swbd5)
 dev.off()
+
+# tdAdj vs inTopicID
+p.swbd6 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
+    stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
+    scale_x_continuous(breaks = 1:10) +
+    scale_linetype_manual(values = c('leader' = 1, 'follower' = 3)) +
+    theme(legend.position = c(.8, .15)) +
+    xlab('within-topic position of sentence') + ylab('normalized tree depth') +
+    guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
+# pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 5, 5)
+# plot(p.swbd6)
+# dev.off()
+
+# bfAdj vs inTopicID
+p.swbd7 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
+    stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
+    scale_x_continuous(breaks = 1:10) +
+    scale_linetype_manual(values = c('leader' = 1, 'follower' = 3)) +
+    theme(legend.position = c(.8, .8)) +
+    xlab('within-topic position of sentence') + ylab('normalized branching factor') +
+    guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
+# pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 5, 5)
+# plot(p.swbd7)
+# dev.off()
+
+## plot tdAdj and bfAdj together in one graph
+library(gridExtra)
+
+pdf('swbd_tdAdj_bfAdj.pdf', 4.5, 9)
+grid.arrange(p.swbd6, p.swbd7, nrow = 2, heights = c(1, 1))
+dev.off()
+
+
+
 
 
 
@@ -138,7 +173,7 @@ plot(p.bnc5)
 dev.off()
 
 # tdAdj vs inTopicID
-p.bnc6 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)) +
+p.bnc6 = ggplot(subset(df.bnc, inTopicID <= 10 & topicID > 1), aes(x = inTopicID, y = tdAdj)) +
     stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
     stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
     scale_x_continuous(breaks = 1:10) +
@@ -149,7 +184,7 @@ plot(p.bnc6)
 dev.off()
 
 # bfAdj vs inTopicID
-p.bnc7 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)) +
+p.bnc7 = ggplot(subset(df.bnc, inTopicID <= 10 & topicID > 1), aes(x = inTopicID, y = bfAdj)) +
     stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
     stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
     scale_x_continuous(breaks = 1:10) +
@@ -164,15 +199,15 @@ dev.off()
 
 
 ## try plotting swbd and bnc together in one figure
-df.swbd.tmp = select(df.swbd, ent, entc, wordNum, inTopicID, role)
+df.swbd.tmp = select(df.swbd, ent, entc, wordNum, td, bf, tdAdj, bfAdj, inTopicID, role)
 df.swbd.tmp$corpus = 'Switchboard'
-df.swbd.tmp$group = 'Switchboard: initiator'
-df.swbd.tmp[df.swbd.tmp$role == 'responder',]$group = 'Switchboard: responder'
+df.swbd.tmp$group = 'Switchboard: leader'
+df.swbd.tmp[df.swbd.tmp$role == 'responder',]$group = 'Switchboard: follower'
 
-df.bnc.tmp = select(df.bnc, ent, entc, wordNum, inTopicID, role)
+df.bnc.tmp = select(df.bnc, ent, entc, wordNum, td, bf, tdAdj, bfAdj, inTopicID, role)
 df.bnc.tmp$corpus = 'BNC'
-df.bnc.tmp$group = 'BNC: initiator'
-df.bnc.tmp[df.bnc.tmp$role == 'responder',]$group = 'BNC: responder'
+df.bnc.tmp$group = 'BNC: leader'
+df.bnc.tmp[df.bnc.tmp$role == 'responder',]$group = 'BNC: follower'
 
 df.all = rbind(df.swbd.tmp, df.bnc.tmp)
 
@@ -181,7 +216,7 @@ gg_color_hue <- function(n) {
   hues = seq(15, 375, length=n+1)
   hcl(h=hues, l=65, c=100)[1:n]
 }
-my_colors = rep(rev(gg_color_hue(2)), 2)
+my_colors = gg_color_hue(2)
 
 # entropy vs inTopicID
 p.together1 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = ent)) +
@@ -202,4 +237,83 @@ plot(p.together1)
 dev.off()
 
 # tree depth vs inTopicID
-p.together2 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = ent)) +
+p.together2 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = td)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = group)) +
+    stat_summary(fun.y = mean, geom = 'line', aes(lty = group)) +
+    stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
+    scale_x_continuous(breaks = 1:10) +
+    theme(legend.position = c(.8, .15)) +
+    xlab('within-topic position of sentence') + ylab('tree depth') +
+    guides(fill = guide_legend(title = 'group'),
+        lty = guide_legend(title = 'group'),
+        shape = guide_legend(title = 'group')) +
+    scale_fill_manual(values = c('BNC: leader' = my_colors[2], 'BNC: follower' = my_colors[2],
+        'Switchboard: leader' = my_colors[1], 'Switchboard: follower' = my_colors[1])) +
+    scale_linetype_manual(values = c('BNC: leader' = 1, 'BNC: follower' = 3, 'Switchboard: leader' = 1, 'Switchboard: follower' = 3)) +
+    scale_shape_manual(values = c('BNC: leader' = 1, 'BNC: follower' = 1, 'Switchboard: leader' = 4, 'Switchboard: follower' = 4))
+# pdf('all-td_vs_inTopicID_roles.pdf', 5, 5)
+# plot(p.together2)
+# dev.off()
+
+# branching factor vs inTopicID
+p.together3 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = bf)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = group)) +
+    stat_summary(fun.y = mean, geom = 'line', aes(lty = group)) +
+    stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
+    scale_x_continuous(breaks = 1:10) +
+    theme(legend.position = c(.8, .15)) +
+    xlab('within-topic position of sentence') + ylab('branching factor') +
+    guides(fill = guide_legend(title = 'group'),
+        lty = guide_legend(title = 'group'),
+        shape = guide_legend(title = 'group')) +
+    scale_fill_manual(values = c('BNC: leader' = my_colors[2], 'BNC: follower' = my_colors[2],
+        'Switchboard: leader' = my_colors[1], 'Switchboard: follower' = my_colors[1])) +
+    scale_linetype_manual(values = c('BNC: leader' = 1, 'BNC: follower' = 3, 'Switchboard: leader' = 1, 'Switchboard: follower' = 3)) +
+    scale_shape_manual(values = c('BNC: leader' = 1, 'BNC: follower' = 1, 'Switchboard: leader' = 4, 'Switchboard: follower' = 4))
+# pdf('all-bf_vs_inTopicID_roles.pdf', 5, 5)
+# plot(p.together3)
+# dev.off()
+
+# wordNum vs inTopicID
+p.together4 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = wordNum)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = group)) +
+    stat_summary(fun.y = mean, geom = 'line', aes(lty = group)) +
+    stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
+    scale_x_continuous(breaks = 1:10) +
+    theme(legend.position = c(.8, .15)) +
+    xlab('within-topic position of sentence') + ylab('sentence length (number of words)') +
+    guides(fill = guide_legend(title = 'group'),
+        lty = guide_legend(title = 'group'),
+        shape = guide_legend(title = 'group')) +
+    scale_fill_manual(values = c('BNC: leader' = my_colors[2], 'BNC: follower' = my_colors[2],
+        'Switchboard: leader' = my_colors[1], 'Switchboard: follower' = my_colors[1])) +
+    scale_linetype_manual(values = c('BNC: leader' = 1, 'BNC: follower' = 3, 'Switchboard: leader' = 1, 'Switchboard: follower' = 3)) +
+    scale_shape_manual(values = c('BNC: leader' = 1, 'BNC: follower' = 1, 'Switchboard: leader' = 4, 'Switchboard: follower' = 4))
+# pdf('all-wordNum_vs_inTopicID_roles.pdf', 5, 5)
+# plot(p.together4)
+# dev.off()
+
+
+
+### plot on one canvas
+library(gridExtra)
+
+# the function that gets the legend of a plot (for multiple plotting that shares one legend)
+g_legend = function(p) {
+    tmp = ggplotGrob(p)
+    leg = which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+    legend = tmp$grobs[[leg]]
+    legend
+}
+
+p.td = p.together2 + theme(legend.position = 'bottom', plot.title = element_text(size = 12))
+p.bf = p.together3
+p.sl = p.together4
+
+lgd = g_legend(p.td)
+pdf('sl_td_bf.pdf', 10, 4)
+grid.arrange(arrangeGrob(p.sl + theme(legend.position = 'none'),
+                        p.td + theme(legend.position = 'none'),
+                        p.bf + theme(legend.position = 'none'), ncol = 3),
+            lgd, nrow = 2, heights = c(9, 1))
+dev.off()
