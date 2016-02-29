@@ -81,7 +81,7 @@ pdf('swbd-bf_vs_inTopicID_roles.pdf')
 plot(p.swbd5)
 dev.off()
 
-# tdAdj vs inTopicID
+# tdAdj vs inTopicID, NTD
 p.swbd6 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)) +
     stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
     stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
@@ -90,11 +90,11 @@ p.swbd6 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)
     theme(legend.position = c(.8, .15)) +
     xlab('within-topic position of sentence') + ylab('normalized tree depth') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 5, 5)
+pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 3, 3)
 plot(p.swbd6)
 dev.off()
 
-# bfAdj vs inTopicID
+# bfAdj vs inTopicID, NBF
 p.swbd7 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)) +
     stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = role)) +
     stat_summary(fun.y = mean, geom = 'line', aes(lty = role)) +
@@ -103,7 +103,7 @@ p.swbd7 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)
     theme(legend.position = c(.8, .8)) +
     xlab('within-topic position of sentence') + ylab('normalized branching factor') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 5, 5)
+pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 3, 3)
 plot(p.swbd7)
 dev.off()
 
@@ -124,8 +124,10 @@ df.swbd.melt[role == 'leader' & variable == 'tdAdj', group := 'NTD: leader']
 df.swbd.melt[role == 'follower' & variable == 'bfAdj', group := 'NBF: follower']
 df.swbd.melt[role == 'leader' & variable == 'bfAdj', group := 'NBF: leader']
 
+df.swbd.melt$group = factor(df.swbd.melt$group, levels = c('NTD: leader', 'NTD: follower', 'NBF: leader', 'NBF: follower'))
+
 p.swbd.adj = ggplot(subset(df.swbd.melt, inTopicID <= 10), aes(x = inTopicID, y = value)) +
-    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .3, aes(fill = group)) +
+    stat_summary(fun.data = mean_cl_boot, geom = 'ribbon', alpha = .5, aes(fill = group)) +
     stat_summary(fun.y = mean, geom = 'line', aes(lty = group)) +
     stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
     scale_x_continuous(breaks = 1:10) +
