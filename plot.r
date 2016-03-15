@@ -187,7 +187,9 @@ p.bnc2 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = entc)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .2)) +
     xlab('within-topic position of sentence') + ylab('adjusted entropy')
+pdf('bnc-entAdj_vs_inTopicID_roles.pdf', 5, 5)
 plot(p.bnc2)
+dev.off()
 
 # wordNum vs inTopicID
 p.bnc3 = ggplot(subset(df.bnc, inTopicID <= 10), aes(x = inTopicID, y = wordNum)) +
