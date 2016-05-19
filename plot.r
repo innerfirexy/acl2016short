@@ -88,7 +88,7 @@ p.swbd6 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)
     scale_x_continuous(breaks = 1:10) +
     scale_linetype_manual(values = c('leader' = 1, 'follower' = 3)) +
     theme(legend.position = c(.8, .15)) +
-    xlab('within-topic position of sentence') + ylab('normalized tree depth') +
+    xlab('Within-topic position of sentence') + ylab('Normalized tree depth') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
 pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 3, 3)
 plot(p.swbd6)
@@ -101,7 +101,7 @@ p.swbd7 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)
     scale_x_continuous(breaks = 1:10) +
     scale_linetype_manual(values = c('leader' = 1, 'follower' = 3)) +
     theme(legend.position = c(.8, .8)) +
-    xlab('within-topic position of sentence') + ylab('normalized branching factor') +
+    xlab('Within-topic position of sentence') + ylab('Normalized branching factor') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
 pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 3, 3)
 plot(p.swbd7)
@@ -249,15 +249,15 @@ dev.off()
 
 
 ## try plotting swbd and bnc together in one figure
-df.swbd.tmp = select(df.swbd, ent, entc, wordNum, td, bf, tdAdj, bfAdj, inTopicID, role)
+df.swbd.tmp = df.swbd[, .(ent, entc, wordNum, td, bf, tdAdj, bfAdj, inTopicID, role)]
 df.swbd.tmp$corpus = 'Switchboard'
 df.swbd.tmp$group = 'Switchboard: leader'
-df.swbd.tmp[df.swbd.tmp$role == 'responder',]$group = 'Switchboard: follower'
+df.swbd.tmp[df.swbd.tmp$role == 'follower',]$group = 'Switchboard: follower'
 
-df.bnc.tmp = select(df.bnc, ent, entc, wordNum, td, bf, tdAdj, bfAdj, inTopicID, role)
+df.bnc.tmp = df.bnc[, .(ent, entc, wordNum, td, bf, tdAdj, bfAdj, inTopicID, role)]
 df.bnc.tmp$corpus = 'BNC'
 df.bnc.tmp$group = 'BNC: leader'
-df.bnc.tmp[df.bnc.tmp$role == 'responder',]$group = 'BNC: follower'
+df.bnc.tmp[df.bnc.tmp$role == 'follower',]$group = 'BNC: follower'
 
 df.all = rbind(df.swbd.tmp, df.bnc.tmp)
 
@@ -275,7 +275,7 @@ p.together1 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = ent
     stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .15)) +
-    xlab('within-topic position of sentence') + ylab('per-word entropy') +
+    xlab('Within-topic position of sentence') + ylab('Per-word entropy') +
     guides(fill = guide_legend(title = 'group'),
         lty = guide_legend(title = 'group'),
         shape = guide_legend(title = 'group')) +
@@ -293,7 +293,7 @@ p.together2 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = td)
     stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .15)) +
-    xlab('within-topic position of sentence') + ylab('tree depth') +
+    xlab('Within-topic position of sentence') + ylab('Tree depth') +
     guides(fill = guide_legend(title = 'group'),
         lty = guide_legend(title = 'group'),
         shape = guide_legend(title = 'group')) +
@@ -312,7 +312,7 @@ p.together3 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = bf)
     stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .15)) +
-    xlab('within-topic position of sentence') + ylab('branching factor') +
+    xlab('Within-topic position of sentence') + ylab('Branching factor') +
     guides(fill = guide_legend(title = 'group'),
         lty = guide_legend(title = 'group'),
         shape = guide_legend(title = 'group')) +
@@ -331,7 +331,7 @@ p.together4 = ggplot(subset(df.all, inTopicID <= 10), aes(x = inTopicID, y = wor
     stat_summary(fun.y = mean, geom = 'point', aes(shape = group)) +
     scale_x_continuous(breaks = 1:10) +
     theme(legend.position = c(.8, .15)) +
-    xlab('within-topic position of sentence') + ylab('sentence length (number of words)') +
+    xlab('Within-topic position of sentence') + ylab('Sentence length (number of words)') +
     guides(fill = guide_legend(title = 'group'),
         lty = guide_legend(title = 'group'),
         shape = guide_legend(title = 'group')) +
@@ -361,6 +361,7 @@ p.bf = p.together3
 p.sl = p.together4
 
 lgd = g_legend(p.td)
+
 pdf('sl_td_bf.pdf', 10, 4)
 grid.arrange(arrangeGrob(p.sl + theme(legend.position = 'none'),
                         p.td + theme(legend.position = 'none'),
