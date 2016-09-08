@@ -90,7 +90,7 @@ p.swbd6 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = tdAdj)
     theme(legend.position = c(.8, .15)) +
     xlab('Within-topic position of sentence') + ylab('Normalized tree depth') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 3, 3)
+pdf('swbd-tdAdj_vs_inTopicID_roles.pdf', 5, 5)
 plot(p.swbd6)
 dev.off()
 
@@ -103,9 +103,12 @@ p.swbd7 = ggplot(subset(df.swbd, inTopicID <= 10), aes(x = inTopicID, y = bfAdj)
     theme(legend.position = c(.8, .8)) +
     xlab('Within-topic position of sentence') + ylab('Normalized branching factor') +
     guides(fill = guide_legend(title = 'speaker role'), lty = guide_legend(title = 'speaker role'))
-pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 3, 3)
+pdf('swbd-bfAdj_vs_inTopicID_roles.pdf', 5, 5)
 plot(p.swbd7)
 dev.off()
+
+
+
 
 ## plot tdAdj and bfAdj together in one graph
 library(gridExtra)
@@ -113,6 +116,11 @@ library(gridExtra)
 pdf('swbd_tdAdj_bfAdj.pdf', 4.5, 9)
 grid.arrange(p.swbd6, p.swbd7, nrow = 2, heights = c(1, 1))
 dev.off()
+
+pdf('swbd_tdAdj_bfAdj_horizontal.pdf', 9, 4.5)
+grid.arrange(p.swbd6 + ggtitle('NTD'), p.swbd7 + ggtitle('NBF'), nrow = 1, widths = c(1, 1))
+dev.off()
+
 
 ## plot tdAdj and bfAdj in one axis
 df.swbd.part = df.swbd[, .(inTopicID, role, tdAdj, bfAdj)]
